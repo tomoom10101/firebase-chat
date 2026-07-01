@@ -1,7 +1,7 @@
 'use client';
 
 import ReactMarkdown from 'react-markdown';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -10,12 +10,20 @@ type Message = {
 
 type ChatBotProps = {
   apiEndpoint: string;
+  initialMessages?: Message[];
+  onSaveMessage?: (message: Message) => Promise<void>;
 };
 
-export default function ChatBot({ apiEndpoint }: ChatBotProps) {
+export default function ChatBot({ apiEndpoint, initialMessages, onSaveMessage }: ChatBotProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (initialMessages && initialMessages.length > 0) {
+      setMessages(initialMessages);
+    }
+  }, [initialMessages]);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -26,6 +34,8 @@ export default function ChatBot({ apiEndpoint }: ChatBotProps) {
     setInput('');
     setIsLoading(true);
 
+    await onSaveMessage?.(userMessage);
+
     const res = await fetch(apiEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -33,7 +43,9 @@ export default function ChatBot({ apiEndpoint }: ChatBotProps) {
     });
 
     const data = await res.json();
-    setMessages([...newMessages, { role: 'assistant', content: data.reply }]);
+    const assistantMessage: Message = { role: 'assistant', content: data.reply };
+    setMessages([...newMessages, assistantMessage]);
+    await onSaveMessage?.(assistantMessage);
     setIsLoading(false);
   };
 
