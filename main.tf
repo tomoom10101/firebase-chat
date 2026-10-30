@@ -92,7 +92,7 @@ resource "google_monitoring_notification_channel" "email_channel" {
 
 resource "google_monitoring_alert_policy" "error_alert" {
   display_name = "Error Rate Alert"
-  combiner      = "OR"
+  combiner     = "OR"
 
   conditions {
     display_name = "5xx errors"
@@ -114,9 +114,9 @@ resource "google_monitoring_alert_policy" "error_alert" {
 }
 
 resource "google_billing_budget" "monthly_budget" {
-  provider         = google.billing
-  billing_account  = "01A67A-B230C9-B566D6"
-  display_name     = "firebase-chat Monthly Budget"
+  provider        = google.billing
+  billing_account = "01A67A-B230C9-B566D6"
+  display_name    = "firebase-chat Monthly Budget"
 
   amount {
     specified_amount {
