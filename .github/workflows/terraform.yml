@@ -12,5 +12,4 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
       - run: terraform fmt -check
       - run: terraform init -backend=false
-      - run: touch ~/terraform-billing-key.json
       - run: terraform validate

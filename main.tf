@@ -7,7 +7,7 @@ provider "google" {
   alias       = "billing"
   project     = "fir-chat-4e112"
   region      = "asia-northeast1"
-  credentials = file(pathexpand("~/terraform-billing-key.json"))
+  credentials = try(file(pathexpand("~/terraform-billing-key.json")), null)
 }
 
 variable "anthropic_api_key" {
