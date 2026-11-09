@@ -165,3 +165,29 @@ resource "google_billing_account_iam_member" "billing_sa_admin" {
   role               = "roles/billing.admin"
   member             = "serviceAccount:${google_service_account.terraform_billing.email}"
 }
+resource "google_service_account" "github_deployer" {
+  account_id   = "github-deployer"
+  display_name = "GitHub Actions Deployer"
+}
+
+resource "google_artifact_registry_repository_iam_member" "deployer_ar_writer" {
+  project    = "fir-chat-4e112"
+  location   = "asia-northeast1"
+  repository = "firebase-chat"
+  role       = "roles/artifactregistry.writer"
+  member     = "serviceAccount:${google_service_account.github_deployer.email}"
+}
+
+resource "google_cloud_run_v2_service_iam_member" "deployer_run_developer" {
+  project  = "fir-chat-4e112"
+  location = "asia-northeast1"
+  name     = google_cloud_run_v2_service.firebase_chat.name
+  role     = "roles/run.developer"
+  member   = "serviceAccount:${google_service_account.github_deployer.email}"
+}
+
+resource "google_service_account_iam_member" "deployer_act_as_runtime" {
+  service_account_id = "projects/fir-chat-4e112/serviceAccounts/648105866948-compute@developer.gserviceaccount.com"
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.github_deployer.email}"
+}
