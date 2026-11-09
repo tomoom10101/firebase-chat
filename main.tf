@@ -28,6 +28,11 @@ resource "google_cloud_run_v2_service" "firebase_chat" {
       }
     }
   }
+  lifecycle {
+    ignore_changes = [
+      template[0].containers[0].image,
+    ]
+  }
 }
 
 resource "google_monitoring_dashboard" "firebase_chat_dashboard" {
