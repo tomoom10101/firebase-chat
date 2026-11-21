@@ -120,7 +120,7 @@ resource "google_monitoring_alert_policy" "error_alert" {
 
 resource "google_billing_budget" "monthly_budget" {
   provider        = google.billing
-  billing_account = "01A67A-B230C9-B566D6"
+  billing_account = var.billing_account_id
   display_name    = "firebase-chat Monthly Budget"
 
   amount {
@@ -161,7 +161,7 @@ resource "google_project_iam_member" "billing_sa_channel_viewer" {
 }
 
 resource "google_billing_account_iam_member" "billing_sa_admin" {
-  billing_account_id = "01A67A-B230C9-B566D6"
+  billing_account_id = var.billing_account_id
   role               = "roles/billing.admin"
   member             = "serviceAccount:${google_service_account.terraform_billing.email}"
 }
@@ -216,4 +216,8 @@ resource "google_service_account_iam_member" "github_wif_deployer" {
 
 output "wif_provider_name" {
   value = google_iam_workload_identity_pool_provider.github.name
+}
+
+variable "billing_account_id" {
+  type = string
 }
