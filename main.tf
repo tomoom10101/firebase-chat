@@ -162,7 +162,7 @@ resource "google_project_iam_member" "billing_sa_channel_viewer" {
 
 resource "google_billing_account_iam_member" "billing_sa_admin" {
   billing_account_id = var.billing_account_id
-  role               = "roles/billing.admin"
+  role               = "roles/billing.costsManager"
   member             = "serviceAccount:${google_service_account.terraform_billing.email}"
 }
 resource "google_service_account" "github_deployer" {
