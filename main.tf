@@ -221,3 +221,40 @@ output "wif_provider_name" {
 variable "billing_account_id" {
   type = string
 }
+
+# ===== Secret Manager（2026-11-28） =====
+
+# 1. Secret Manager の API を有効にする
+resource "google_project_service" "secretmanager" {
+  service            = "secretmanager.googleapis.com"
+  disable_on_destroy = false
+}
+
+# 2. 箱（中身は gcloud で入れる）
+resource "google_secret_manager_secret" "anthropic_key" {
+  secret_id = "anthropic-api-key"
+  replication {
+    auto {}
+  }
+  depends_on = [google_project_service.secretmanager]
+}
+
+# 3. Cloud Run 専用の実行用 SA
+resource "google_service_account" "firebase_chat_runtime" {
+  account_id   = "firebase-chat-runtime"
+  display_name = "firebase-chat Cloud Run runtime"
+}
+
+# 4. 実行用 SA に、箱を読む許可
+resource "google_secret_manager_secret_iam_member" "runtime_can_read_anthropic_key" {
+  secret_id = google_secret_manager_secret.anthropic_key.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.firebase_chat_runtime.email}"
+}
+
+# 5. github-deployer に、実行用 SA として働く許可
+resource "google_service_account_iam_member" "deployer_act_as_firebase_chat_runtime" {
+  service_account_id = google_service_account.firebase_chat_runtime.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.github_deployer.email}"
+}
