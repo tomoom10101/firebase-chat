@@ -10,21 +10,24 @@ provider "google" {
   credentials = try(file(pathexpand("~/terraform-billing-key.json")), null)
 }
 
-variable "anthropic_api_key" {
-  sensitive = true
-}
-
 resource "google_cloud_run_v2_service" "firebase_chat" {
   name     = "firebase-chat"
   location = "asia-northeast1"
 
   template {
+    service_account = google_service_account.firebase_chat_runtime.email
+
     containers {
       image = "asia-northeast1-docker.pkg.dev/fir-chat-4e112/firebase-chat/firebase-chat:latest"
 
       env {
-        name  = "ANTHROPIC_API_KEY"
-        value = var.anthropic_api_key
+        name = "ANTHROPIC_API_KEY"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.anthropic_key.secret_id
+            version = "latest"
+          }
+        }
       }
     }
   }
